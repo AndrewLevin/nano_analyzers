@@ -9,7 +9,8 @@ def deltaR(eta1,phi1,eta2,phi2):
 
 #f=ROOT.TFile.Open("/afs/cern.ch/work/a/amlevin/tmp/BD10FEDE-2447-174B-8426-4BE7869483C4.root") #powheg plus
 #f=ROOT.TFile.Open("/afs/cern.ch/work/a/amlevin/tmp/2DCB7126-1603-8D4C-BF2C-51991D71D4F8.root") #powheg minus
-f=ROOT.TFile.Open("/afs/cern.ch/work/a/amlevin/tmp/EFC1BDD3-7856-3B4B-9BBE-1A35E0041590.root") #mg5_aMC
+#f=ROOT.TFile.Open("/afs/cern.ch/work/a/amlevin/tmp/EFC1BDD3-7856-3B4B-9BBE-1A35E0041590.root") #mg5_aMC
+f=ROOT.TFile.Open("/afs/cern.ch/work/a/amlevin/tmp/wgjets.root") #mg5_aMC
 t=f.Get("Events")
 
 sample_xs = 178.6
@@ -27,7 +28,7 @@ n_weighted_pdf_pass_fiducial = []
 n_weighted_scale_pass_fiducial = []
 
 n_total_plus = 0
-n_weighted_plus = ROOT.TH1F("n_weighted","n_weighted",1,0,1)
+n_weighted_plus = ROOT.TH1F("n_weighted_plus","n_weighted_plus",1,0,1)
 n_weighted_plus.Sumw2()
 n_weighted_pass_fiducial_plus = ROOT.TH1F("n_weighted_pass_fiducial_plus","n_weighted_fiducial_plus",1,0,1)
 n_weighted_pass_fiducial_plus.Sumw2()
@@ -37,9 +38,9 @@ n_weighted_pdf_pass_fiducial_plus = []
 n_weighted_scale_pass_fiducial_plus = []
 
 n_total_minus = 0
-n_weighted_minus = ROOT.TH1F("n_weighted","n_weighted",1,0,1)
+n_weighted_minus = ROOT.TH1F("n_weighted_minus","n_weighted_minus",1,0,1)
 n_weighted_minus.Sumw2()
-n_weighted_pass_fiducial_minus = ROOT.TH1F("n_weighted_pass_fiducial","n_weighted_fiducial",1,0,1)
+n_weighted_pass_fiducial_minus = ROOT.TH1F("n_weighted_pass_fiducial_minus","n_weighted_fiducial_minus",1,0,1)
 n_weighted_pass_fiducial_minus.Sumw2()
 n_weighted_pdf_minus = []
 n_weighted_scale_minus = []
@@ -52,7 +53,7 @@ for i in range(0,32):
     n_weighted_pdf_pass_fiducial.append(ROOT.TH1F("n_weighted_pass_fiducial_pdf_variation"+str(i),"n_weighted_pass_fiducial_pdf_variation"+str(i),1,0,1))
     n_weighted_pdf_pass_fiducial[i].Sumw2()
 
-    n_weighted_pdf_plus.append(ROOT.TH1F("n_weighted_pdf_variation_plus"+str(i),"n_weighted_pdf_variation_plus"+str(i),1,0,1))
+    n_weighted_pdf_plus.append(ROOT.TH1F("n_weighted_plus_pdf_variation"+str(i),"n_weighted_plus_pdf_variation"+str(i),1,0,1))
     n_weighted_pdf_plus[i].Sumw2()
     n_weighted_pdf_pass_fiducial_plus.append(ROOT.TH1F("n_weighted_pass_fiducial_plus_pdf_variation"+str(i),"n_weighted_pass_fiducial_plus_pdf_variation"+str(i),1,0,1))
     n_weighted_pdf_pass_fiducial_plus[i].Sumw2()
@@ -68,19 +69,19 @@ for i in range(0,8):
     n_weighted_scale_pass_fiducial.append(ROOT.TH1F("n_weighted_pass_fiducial_scale_variation"+str(i),"n_weighted_pass_fiducial_scale_variation"+str(i),1,0,1))
     n_weighted_scale_pass_fiducial[i].Sumw2()
 
-    n_weighted_scale_plus.append(ROOT.TH1F("n_weighted_scale_variation_plus"+str(i),"n_weighted_scale_variation_plus"+str(i),1,0,1))
+    n_weighted_scale_plus.append(ROOT.TH1F("n_weighted_plus_scale_variation"+str(i),"n_weighted_plus_scale_variation"+str(i),1,0,1))
     n_weighted_scale_plus[i].Sumw2()
     n_weighted_scale_pass_fiducial_plus.append(ROOT.TH1F("n_weighted_pass_fiducial_plus_scale_variation"+str(i),"n_weighted_pass_fiducial_plus_scale_variation"+str(i),1,0,1))
     n_weighted_scale_pass_fiducial_plus[i].Sumw2()
 
-    n_weighted_scale_minus.append(ROOT.TH1F("n_weighted_scale_variation"+str(i),"n_weighted_scale_variation"+str(i),1,0,1))
+    n_weighted_scale_minus.append(ROOT.TH1F("n_weighted_minus_scale_variation"+str(i),"n_weighted_minus_scale_variation"+str(i),1,0,1))
     n_weighted_scale_minus[i].Sumw2()
     n_weighted_scale_pass_fiducial_minus.append(ROOT.TH1F("n_weighted_pass_fiducial_minus_scale_variation"+str(i),"n_weighted_pass_fiducial_minus_scale_variation"+str(i),1,0,1))
     n_weighted_scale_pass_fiducial_minus[i].Sumw2()
 
 isprompt_mask = (1 << 0) #isPrompt                                                                                                                           
 isfromhardprocess_mask = (1 << 8) #isFromHardProcess                                                                                                         
-isprompttaudecayproduct_mask = (1 << 4) #isPromptTauDecayProduct
+isdirectprompttaudecayproduct_mask = (1 << 5) #isDirectPromptTauDecayProduct
 
 print "t.GetEntries() = "+str(t.GetEntries())
 for i in range(0,t.GetEntries()):
@@ -88,27 +89,64 @@ for i in range(0,t.GetEntries()):
         print "n_total = "+str(n_total)
     n_total+=1
     t.GetEntry(i)
-
     n_gen_leptons = 0
     n_gen_photons = 0
-    for i in range(0,t.nGenPart):
-        if t.GenPart_pt[i] > 5 and t.GenPart_status[i] == 1 and (abs(t.GenPart_pdgId[i]) == 11 or abs(t.GenPart_pdgId[i]) == 13 or abs(t.GenPart_pdgId[i]) == 15) and (t.GenPart_statusFlags[i] & isfromhardprocess_mask == isfromhardprocess_mask) and ((t.GenPart_statusFlags[i] & isprompt_mask == isprompt_mask) or (t.GenPart_statusFlags[i] & isprompttaudecayproduct_mask == isprompttaudecayproduct_mask)):
-            gen_lepton_index = i
-            n_gen_leptons +=  1
-#        if t.GenPart_pt[i] > 5 and t.GenPart_status[i] == 1 and t.GenPart_pdgId[i] == 22 and (t.GenPart_statusFlags[i] & isfromhardprocess_mask == isfromhardprocess_mask) and (t.GenPart_statusFlags[i] & isprompt_mask == isprompt_mask):
-        if n_gen_photons == 0 and t.GenPart_pt[i] > 5 and t.GenPart_status[i] == 1 and t.GenPart_pdgId[i] == 22 and (t.GenPart_statusFlags[i] & isprompt_mask == isprompt_mask):
-            gen_photon_index = i
-            n_gen_photons +=1
-            
+
+    for j in range(0,t.nGenPart):
+        if t.GenPart_pt[j] > 25 and t.GenPart_status[j] == 1 and (abs(t.GenPart_pdgId[j]) == 11 or abs(t.GenPart_pdgId[j]) == 13):
+            lep_iso=0
+            for k in range(0,t.nGenPart):
+
+                if k == j:
+                    continue
+                        
+                if  t.GenPart_status[k] != 1:
+                    continue
+
+                if abs(t.GenPart_pdgId[k]) == 12 or abs(t.GenPart_pdgId[k]) == 14 or abs(t.GenPart_pdgId[k]) == 16:
+                    continue
+
+                if deltaR(t.GenPart_eta[k],t.GenPart_phi[k],t.GenPart_eta[j],t.GenPart_phi[j]) < 0.4:
+                    lep_iso += t.GenPart_pt[k]
+
+                lep_iso /= t.GenPart_pt[j]
+
+                if lep_iso < 0.5:
+                    if n_gen_leptons == 0:
+                        gen_lepton_index = j
+                    n_gen_leptons +=1
+
+        if t.GenPart_pt[j] > 25 and t.GenPart_status[j] == 1 and t.GenPart_pdgId[j] == 22 and abs(t.GenPart_eta[j]) < 2.5:
+            pho_iso=0
+            for k in range(0,t.nGenPart):
+
+                if k == j:
+                    continue
+                        
+                if  t.GenPart_status[k] != 1:
+                    continue
+
+                if abs(t.GenPart_pdgId[k]) == 12 or abs(t.GenPart_pdgId[k]) == 14 or abs(t.GenPart_pdgId[k]) == 16:
+                    continue
+
+                if deltaR(t.GenPart_eta[k],t.GenPart_phi[k],t.GenPart_eta[j],t.GenPart_phi[j]) < 0.4:
+                    pho_iso += t.GenPart_pt[k]
+
+                pho_iso /= t.GenPart_pt[j]
+
+                if pho_iso < 0.5:
+                    if n_gen_photons == 0:
+                        gen_photon_index = j
+                    n_gen_photons +=1
 
     pass_fiducial = False
 
-    if n_gen_leptons == 1 and n_gen_photons == 1:
-        if deltaR(t.GenPart_eta[gen_lepton_index],t.GenPart_phi[gen_lepton_index],t.GenPart_eta[gen_photon_index],t.GenPart_phi[gen_photon_index]) > 0.5 and t.GenPart_pt[gen_lepton_index] > 20 and t.GenPart_pt[gen_photon_index] > 20 and abs(t.GenPart_eta[gen_photon_index]) < 2.5:
+    if n_gen_leptons >= 1 and n_gen_photons >= 1:
+        if deltaR(t.GenPart_eta[gen_lepton_index],t.GenPart_phi[gen_lepton_index],t.GenPart_eta[gen_photon_index],t.GenPart_phi[gen_photon_index]) > 0.5 and t.GenPart_pt[gen_lepton_index] > 25 and t.GenPart_pt[gen_photon_index] > 25 and abs(t.GenPart_eta[gen_lepton_index]) < 2.5 and abs(t.GenPart_eta[gen_photon_index]) < 2.5 and t.GenMET_pt > 40:
             pass_fiducial = True
 
-    assert(n_gen_leptons == 1 or n_gen_leptons == 0)
-    assert(n_gen_photons == 1 or n_gen_photons == 0)
+#    assert(n_gen_leptons == 1 or n_gen_leptons == 0)
+#    assert(n_gen_photons == 1 or n_gen_photons == 0)
 
     if t.Generator_weight > 0:
         n_weighted.Fill(0.5)
